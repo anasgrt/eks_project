@@ -22,11 +22,11 @@ resource "kubernetes_service_account" "service-account" {
   metadata {
     name      = local.alb_ingress_controller_service_account_name
     namespace = local.alb_ingress_controller_namespace
-    # labels = {
-    #   "app.kubernetes.io/name"       = "aws-load-balancer-controller"
-    #   "app.kubernetes.io/component"  = "controller"
-    #   "app.kubernetes.io/managed-by" = "Helm"
-    # }
+    labels = {
+      "app.kubernetes.io/name"       = "aws-load-balancer-controller"
+      "app.kubernetes.io/component"  = "controller"
+      "app.kubernetes.io/managed-by" = "Helm"
+    }
     annotations = {
       "eks.amazonaws.com/role-arn"               = module.alb_ingress_controller_role.iam_role_arn
       "eks.amazonaws.com/sts-regional-endpoints" = "true"
