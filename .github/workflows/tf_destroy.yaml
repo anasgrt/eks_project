@@ -1,0 +1,47 @@
+name: tf-destroy / Kabisa-playground-anas
+
+on:
+    pull_request:
+      types: [labeled]
+     
+    workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  destroy:
+    name: "Destroy infra in AWS"
+    if: ${{ github.event.label.name == 'destroy' }}
+    environment: tf-oidc
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        # working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: MySessionName
+          role-skip-session-tagging: true
+
+      - name: terraform destroy
+        uses: dflook/terraform-destroy@v1
+        id: first_try
+        continue-on-error: true
+        with:
+          path: ./eks
+
+      - name: Retry failed destroy
+        uses: dflook/terraform-destroy@v1
+        if: ${{ steps.first_try.outputs.failure-reason == 'destroy-failed' }}
+        with:
+          path: ./eks
