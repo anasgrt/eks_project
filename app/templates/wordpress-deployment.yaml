@@ -1,0 +1,57 @@
+{{- $wordpress := .Values.wordpress | default dict }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+spec:
+  replicas: {{ .Values.wordpress.replicas }}
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: "{{ .Values.wordpress.image.repo }}"
+          imagePullPolicy: {{ .Values.wordpress.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+              name: wordpress
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /var/www/html
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: {{ .Values.wordpress.dbHost }}
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.wordpress.dbRootPasswordSecret }}
+                  key: MYSQL_ROOT_PASSWORD
+            - name: WORDPRESS_DB_USER
+              value: {{ .Values.wordpress.dbUser }}
+            - name: WORDPRESS_DB_NAME
+              value: {{ .Values.wordpress.dbName }}
+      volumes:
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: wordpress-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: wordpress-service
+spec:
+  type: {{ .Values.wordpress.serviceType }}
+  selector:
+    app: wordpress
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.wordpress.servicePort }}
+      targetPort: 80
+      nodePort: {{ .Values.wordpress.nodePort }}
+---

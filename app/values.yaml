@@ -1,0 +1,64 @@
+# Helm Values file
+wordpress:
+  enabled: true
+  image:
+    repo: wordpress:5.8.3-php7.4-apache
+    pullPolicy: IfNotPresent
+  replicas: 2
+  dbHost: mysql-service.wordpress.svc.cluster.local
+  dbRootPasswordSecret: mysql-secret
+  dbUser: root
+  dbName: mysql
+  serviceType: NodePort
+  servicePort: 80
+  nodePort: 30001
+
+phpmyadmin:
+  enabled: true
+  image: phpmyadmin/phpmyadmin
+  replicas: 1
+  mysqlHost: mysql-service
+  mysqlPort: "3306"
+  mysqlRootPasswordSecret: mysql-secret
+  serviceType: NodePort
+  servicePort: 80
+  nodePort: 30002
+
+mysql:
+  enabled: true
+  image: mysql:5.7
+  replicas: 1
+  serviceName: mysql
+
+wordpressPV:
+  enabled: true
+  name: wordpress-pv
+  storage: 3Gi
+  accessModes: ReadWriteOnce
+  reclaimPolicy: Retain
+  storageClassName: manual
+  hostPath: /home/ubuntu/project/wp-data
+
+wordpressPVC:
+  enabled: true
+  name: wordpress-pvc
+  storage: 1Gi
+  accessModes: ReadWriteOnce
+  storageClassName: manual
+
+mysqlPV:
+  enabled: true
+  name: mysql-pv
+  storage: 3Gi
+  accessModes: ReadWriteOnce
+  reclaimPolicy: Retain
+  storageClassName: mysql
+  hostPath: /home/ubuntu/project/mysql-data
+
+mysqlPVC:
+  enabled: true
+  name: mysql-pvc
+  storage: 3Gi
+  accessModes: ReadWriteOnce
+  storageClassName: mysql
+

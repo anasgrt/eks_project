@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin-deployment
+  labels:
+    app: phpmyadmin
+spec:
+  replicas: {{ .Values.phpmyadmin.replicas }}
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+        - name: phpmyadmin
+          image: {{ .Values.phpmyadmin.image }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: PMA_HOST
+              value: {{ .Values.phpmyadmin.mysqlHost }}
+            - name: PMA_PORT
+              value: "{{ .Values.phpmyadmin.mysqlPort }}"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.phpmyadmin.mysqlRootPasswordSecret }}
+                  key: ROOT_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin-service
+spec:
+  type: {{ .Values.phpmyadmin.serviceType }}
+  selector:
+    app: phpmyadmin
+  ports:
+    - protocol: TCP
+      port: {{ .Values.phpmyadmin.servicePort }}
+      targetPort: 80
+      nodePort: {{ .Values.phpmyadmin.nodePort }}

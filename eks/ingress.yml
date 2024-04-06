@@ -1,0 +1,96 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: alb
+  rules:
+    # - host: k8s-monitori-albingre-bd409f8181-788632762.eu-west-1.elb.amazonaws.com
+    - http:
+        paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: monitoring-kube-prometheus-prometheus
+              port:
+                number: 9090
+---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: alb-ingress-kibana
+#   namespace: kube-system
+#   annotations:
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   ingressClassName: alb
+#   rules:
+#     - host: k8s-monitori-albingre-bd409f8181-788632762.eu-west-1.elb.amazonaws.com
+#       http:
+#         paths:
+#         - pathType: Prefix
+#           path: "/kibana"
+#           backend:
+#             service:
+#               name: kibana-logging
+#               port:
+#                 number: 5601
+---
+
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: prometheus-ingress
+#   namespace: mutual
+#   annotations:
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+#     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+#     alb.ingress.kubernetes.io/healthcheck-port: http-healthcheck
+#     alb.ingress.kubernetes.io/healthcheck-path: /healthcheck
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   ingressClassName: alb
+#   rules:
+#   # - host: k8s-monitori-albingre-bd409f8181-788632762.eu-west-1.elb.amazonaws.com
+#   - http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: prometheus-svc-bridge
+#             port:
+#               number: 9090
+#       - path: /kibana
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: kibana-svc-bridge
+#             port:
+#               number: 5601
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: prometheus-svc-bridge
+#   namespace: mutual
+# spec:
+#   type: ExternalName
+#   externalName: monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: kibana-svc-bridge
+#   namespace: mutual
+# spec:
+#   type: ExternalName
+#   externalName: kibana-logging.kube-system.svc.cluster.local

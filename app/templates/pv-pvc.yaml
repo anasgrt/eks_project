@@ -1,0 +1,62 @@
+{{- if .Values.wordpressPV.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.wordpressPV.name }}
+spec:
+  capacity:
+    storage: {{ .Values.wordpressPV.storage }}
+  accessModes:
+    - {{ .Values.wordpressPV.accessModes }}
+  persistentVolumeReclaimPolicy: {{ .Values.wordpressPV.reclaimPolicy }}
+  storageClassName: {{ .Values.wordpressPV.storageClassName }}
+  hostPath:
+    path: {{ .Values.wordpressPV.hostPath }}
+{{- end }}
+
+{{- if .Values.wordpressPVC.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.wordpressPVC.name }}
+spec:
+  accessModes:
+    - {{ .Values.wordpressPVC.accessModes }}
+  resources:
+    requests:
+      storage: {{ .Values.wordpressPVC.storage }}
+  storageClassName: {{ .Values.wordpressPVC.storageClassName }}
+{{- end }}
+
+{{- if .Values.mysqlPV.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.mysqlPV.name }}
+spec:
+  capacity:
+    storage: {{ .Values.mysqlPV.storage }}
+  accessModes:
+    - {{ .Values.mysqlPV.accessModes }}
+  persistentVolumeReclaimPolicy: {{ .Values.mysqlPV.reclaimPolicy }}
+  storageClassName: {{ .Values.mysqlPV.storageClassName }}
+  hostPath:
+    path: {{ .Values.mysqlPV.hostPath }}
+{{- end }}
+
+{{- if .Values.mysqlPVC.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.mysqlPVC.name }}
+spec:
+  accessModes:
+    - {{ .Values.mysqlPVC.accessModes }}
+  resources:
+    requests:
+      storage: {{ .Values.mysqlPVC.storage }}
+  storageClassName: {{ .Values.mysqlPVC.storageClassName }}
+{{- end }}
