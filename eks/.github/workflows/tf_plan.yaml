@@ -1,0 +1,62 @@
+name: tf-plan / Kabisa-playground-anas
+
+on:
+  pull_request:
+
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+
+  plan:
+    name: "Terraform Plan on kabisa-playground-anas Account"
+    environment: tf-oidc
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+
+    steps:
+    #   - name: Setup Node 20
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 20
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: MySessionName
+          role-skip-session-tagging: true
+
+      # - name: Cache Terraform Plugins
+      #   id: cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ${{ runner.temp }}/_github_home/.terraform.d/plugin-cache
+      #     key: ${{ runner.os }}-tf-${{ hashFiles('**/.terraform.lock.hcl') }}
+
+      - name: terraform plan
+        id: plan
+        uses: dflook/terraform-plan@v1
+        env:
+          add_github_comment: changes-only
+          TF_PLAN_COLLAPSE_LENGTH: 30
+        with:
+          path: .
+          label: EKS
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+           

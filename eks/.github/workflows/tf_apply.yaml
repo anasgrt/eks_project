@@ -1,0 +1,54 @@
+name: tf-apply / Kabisa-playground-anas
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [labeled]
+  
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  apply:
+    name: "Deploy to AWS"
+    if: ${{ github.event.label.name == 'apply' }}
+    environment: tf-oidc
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: MySessionName
+          role-skip-session-tagging: true
+
+      - name: terraform apply 
+        uses: dflook/terraform-apply@v1
+        continue-on-error: true
+        id: first_try
+        with:
+          path: .
+          auto_approve: false
+          label: EKS
+
+      - name: Retry failed terraform apply
+        uses: dflook/terraform-apply@v1
+        with:
+          path: .
+          auto_approve: false
