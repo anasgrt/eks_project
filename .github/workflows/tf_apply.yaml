@@ -1,9 +1,9 @@
 name: tf-apply / Kabisa-playground-anas
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   pull_request:
     types: [labeled]
   
