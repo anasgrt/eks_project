@@ -18,7 +18,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: .
+        # working-directory: ./eks
 
     steps:
     #   - name: Setup Node 20
@@ -52,7 +52,7 @@ jobs:
           add_github_comment: changes-only
           TF_PLAN_COLLAPSE_LENGTH: 30
         with:
-          path: .
+          path: ./eks
           label: EKS
 
       - name: Terraform Plan Status

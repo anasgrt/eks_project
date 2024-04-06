@@ -1,9 +1,9 @@
 name: tf-apply / Kabisa-playground-anas
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   pull_request:
     types: [labeled]
   
@@ -22,7 +22,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: .
+        # working-directory: ./eks
 
     steps:
       - name: Checkout
@@ -43,12 +43,12 @@ jobs:
         continue-on-error: true
         id: first_try
         with:
-          path: .
+          path: ./eks
           auto_approve: false
           label: EKS
 
       - name: Retry failed terraform apply
         uses: dflook/terraform-apply@v1
         with:
-          path: .
+          path: ./eks
           auto_approve: false
