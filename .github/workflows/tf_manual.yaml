@@ -1,0 +1,72 @@
+name: Terraform Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraform_operation:
+        description: "Terraform operation: plan, apply, destroy"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+permissions: write-all
+
+jobs:
+  terraform:
+    name: "Terraform Operations"
+    environment: tf-oidc
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: MySessionName
+          role-skip-session-tagging: true
+
+      - name: terraform plan
+        id: plan
+        if: "${{ github.event.inputs.terraform_operation == 'plan' }}"
+        uses: dflook/terraform-plan@v1
+        env:
+          add_github_comment: changes-only
+          TF_PLAN_COLLAPSE_LENGTH: 30
+        with:
+          path: ./eks
+          label: EKS
+
+      - name: terraform apply 
+        uses: dflook/terraform-apply@v1
+        # continue-on-error: true
+        id: apply
+        if: "${{ github.event.inputs.terraform_operation == 'apply' }}"
+        with:
+          path: ./eks
+          auto_approve: true
+          label: EKS
+
+      - name: terraform destroy
+        uses: dflook/terraform-destroy@v1
+        id: destroy_first_try
+        if: "${{ github.event.inputs.terraform_operation == 'destroy' }}"
+        continue-on-error: true
+        with:
+          path: ./eks
+
+      - name: Retry failed destroy
+        uses: dflook/terraform-destroy@v1
+        if: ${{ steps.destroy_first_try.outputs.failure-reason == 'destroy-failed' }}
+        with:
+          path: ./eks
