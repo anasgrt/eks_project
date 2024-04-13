@@ -28,13 +28,13 @@ terraform {
   }
 
 
-  # backend "s3" {
-  #   region         = "eu-west-1"
-  #   bucket         = "terraform-statefiles-kabisa-playground"
-  #   dynamodb_table = "kabisa-terraform-lockfiles"
-  #   key            = "kabisa-playground/education-eks.tfstate"
-  #   encrypt        = true
-  #   role_arn       = "arn:aws:iam::820116308106:role/admin"
-  #   session_name   = "terraform"
-  # }
+  backend "s3" {
+    region         = "eu-west-1"
+    bucket         = "terraform-statefiles-kabisa-playground"
+    dynamodb_table = "kabisa-terraform-lockfiles"
+    key            = "kabisa-playground/education-eks.tfstate"
+    encrypt        = true
+    role_arn       = "arn:aws:iam::820116308106:role/admin"
+    session_name   = "terraform"
+  }
 }

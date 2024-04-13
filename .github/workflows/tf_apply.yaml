@@ -51,4 +51,4 @@ jobs:
         uses: dflook/terraform-apply@v1
         with:
           path: ./eks
-          auto_approve: false
+          auto_approve: true
