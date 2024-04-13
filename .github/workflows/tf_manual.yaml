@@ -49,9 +49,18 @@ jobs:
 
       - name: terraform apply 
         uses: dflook/terraform-apply@v1
-        # continue-on-error: true
+        continue-on-error: true
         id: apply
         if: "${{ github.event.inputs.terraform_operation == 'apply' }}"
+        with:
+          path: ./eks
+          auto_approve: true
+          label: EKS
+
+      - name: Retry failed terraform apply
+        id: apply_retry
+        if: ${{ steps.apply.outputs.failure-reason == 'apply-failed' }}
+        uses: dflook/terraform-apply@v1
         with:
           path: ./eks
           auto_approve: true
